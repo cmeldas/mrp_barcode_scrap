@@ -85,9 +85,16 @@ export class ScrapBarcodeDashboard extends Component {
     }
 
     async onBarcodeKeydown(ev) {
-        if (ev.key === "Enter" && this.state.barcode.trim()) {
-            await this.processBarcode(this.state.barcode.trim());
+        if (ev.key === "Enter" && this.state.barcode.trim() && !this._processingBarcode) {
+            ev.preventDefault();
+            const barcode = this.state.barcode.trim();
             this.state.barcode = "";
+            this._processingBarcode = true;
+            try {
+                await this.processBarcode(barcode);
+            } finally {
+                this._processingBarcode = false;
+            }
             this._focusBarcodeInput();
         }
     }
