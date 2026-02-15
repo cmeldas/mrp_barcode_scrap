@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Scrap Barcode Config Form View -->
+    <record id="view_scrap_barcode_config_form" model="ir.ui.view">
+        <field name="name">scrap.barcode.config.form</field>
+        <field name="model">scrap.barcode.config</field>
+        <field name="arch" type="xml">
+            <form string="Scrap Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="default_scrap_reason_tag_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Scrap Barcode Config Tree View -->
+    <record id="view_scrap_barcode_config_tree" model="ir.ui.view">
+        <field name="name">scrap.barcode.config.tree</field>
+        <field name="model">scrap.barcode.config</field>
+        <field name="arch" type="xml">
+            <list string="Scrap Configurations">
+                <field name="name"/>
+                <field name="default_scrap_reason_tag_id"/>
+                <field name="active"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action for Config -->
+    <record id="action_scrap_barcode_config" model="ir.actions.act_window">
+        <field name="name">Scrap Configuration</field>
+        <field name="res_model">scrap.barcode.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first scrap configuration
+            </p>
+            <p>
+                Configure the default scrap reason and other settings.
+            </p>
+        </field>
+    </record>
+</odoo>

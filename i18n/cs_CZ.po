@@ -1,0 +1,357 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* mrp_barcode_scrap
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-01 00:00+0000\n"
+"PO-Revision-Date: 2026-01-01 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Czech\n"
+"Language: cs_CZ\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "Barcode Error"
+msgstr "Chyba čárového kódu"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "Product not found"
+msgstr "Produkt nenalezen"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "Error scanning barcode"
+msgstr "Chyba při skenování čárového kódu"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "No products to scrap"
+msgstr "Žádné produkty k vyřazení"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "%s scrap order(s) created and confirmed"
+msgstr "%s objednávka(y) vyřazení vytvořena a potvrzena"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "Error creating scrap orders"
+msgstr "Chyba při vytváření objednávek vyřazení"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "Update Stock"
+msgstr "Aktualizovat zásoby"
+
+#. module: mrp_barcode_scrap
+#: model:ir.actions.client,name:mrp_barcode_scrap.action_scrap_barcode_dashboard
+msgid "Barcode Scrap"
+msgstr "Vyřazení čárovým kódem"
+
+#. module: mrp_barcode_scrap
+#: model:ir.actions.act_window,name:mrp_barcode_scrap.action_scrap_barcode_config
+msgid "Scrap Configuration"
+msgstr "Nastavení vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model:ir.ui.menu,name:mrp_barcode_scrap.menu_mrp_barcode_scrap_root
+msgid "Barcode Scrap"
+msgstr "Vyřazení čárovým kódem"
+
+#. module: mrp_barcode_scrap
+#: model:ir.ui.menu,name:mrp_barcode_scrap.menu_mrp_barcode_scrap_config
+msgid "Scrap Configuration"
+msgstr "Nastavení vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model,name:mrp_barcode_scrap.model_scrap_barcode_config
+msgid "Scrap Barcode Configuration"
+msgstr "Nastavení čárového kódu pro vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model,name:mrp_barcode_scrap.model_scrap_dashboard
+msgid "Scrap Dashboard"
+msgstr "Panel vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model.fields,field_description:mrp_barcode_scrap.field_scrap_barcode_config__name
+msgid "Name"
+msgstr "Název"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model.fields,field_description:mrp_barcode_scrap.field_scrap_barcode_config__default_scrap_reason_tag_id
+msgid "Default Scrap Reason"
+msgstr "Výchozí důvod vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model.fields,field_description:mrp_barcode_scrap.field_scrap_barcode_config__active
+msgid "Active"
+msgstr "Aktivní"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model.fields,field_description:mrp_barcode_scrap.field_scrap_barcode_config__company_id
+msgid "Company"
+msgstr "Společnost"
+
+#. module: mrp_barcode_scrap
+#: model:ir.model.fields,help:mrp_barcode_scrap.field_scrap_barcode_config__default_scrap_reason_tag_id
+msgid "Default scrap reason tag that will be pre-selected when scrapping products."
+msgstr "Výchozí štítek důvodu vyřazení, který bude předvybrán při vyřazení produktů."
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scan or type barcode..."
+msgstr "Naskenujte nebo zadejte čárový kód..."
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scan a product barcode to begin"
+msgstr "Naskenujte čárový kód produktu pro začátek"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Weight"
+msgstr "Váha"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Pieces"
+msgstr "Kusy"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrap Reason:"
+msgstr "Důvod vyřazení:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "-- Select a reason --"
+msgstr "-- Vyberte důvod --"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrap all in stock"
+msgstr "Vyřadit vše na skladě"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "In stock:"
+msgstr "Na skladě:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Total scrap value:"
+msgstr "Celková hodnota vyřazení:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Confirm Scrap"
+msgstr "Potvrdit vyřazení"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Are you sure you want to scrap the following products?"
+msgstr "Opravdu chcete vyřadit následující produkty?"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "This action cannot be undone."
+msgstr "Tuto akci nelze vrátit zpět."
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Cancel"
+msgstr "Zrušit"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrap Completed Successfully"
+msgstr "Vyřazení bylo úspěšně dokončeno"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "scrap order(s) created and confirmed"
+msgstr "objednávka(y) vyřazení vytvořena a potvrzena"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrapped Items"
+msgstr "Vyřazené položky"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrap Order"
+msgstr "Objednávka vyřazení"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Product"
+msgstr "Produkt"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Quantity"
+msgstr "Množství"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "UoM"
+msgstr "JM"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Current Stock Levels (After Scrap)"
+msgstr "Aktuální stav zásob (po vyřazení)"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Current Stock"
+msgstr "Aktuální zásoby"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Stock Value"
+msgstr "Hodnota zásob"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Actions"
+msgstr "Akce"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Open Product"
+msgstr "Otevřít produkt"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Update Stock"
+msgstr "Aktualizovat zásoby"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Start New Scrap Session"
+msgstr "Zahájit nové vyřazení"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Processing scrap orders..."
+msgstr "Zpracovávám objednávky vyřazení..."
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "items"
+msgstr "položek"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Unit Price"
+msgstr "Jednotková cena"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Subtotal"
+msgstr "Mezisoučet"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Remove"
+msgstr "Odebrat"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Total"
+msgstr "Celkem"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Reason:"
+msgstr "Důvod:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Value"
+msgstr "Hodnota"
+
+#. module: mrp_barcode_scrap
+#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.view_scrap_barcode_config_form
+msgid "Scrap Configuration"
+msgstr "Nastavení vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model_terms:ir.actions.act_window,help:mrp_barcode_scrap.action_scrap_barcode_config
+msgid "Create your first scrap configuration"
+msgstr "Vytvořte vaši první konfiguraci vyřazení"
+
+#. module: mrp_barcode_scrap
+#: model_terms:ir.actions.act_window,help:mrp_barcode_scrap.action_scrap_barcode_config
+msgid "Configure the default scrap reason and other settings."
+msgstr "Nastavte výchozí důvod vyřazení a další nastavení."
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/scrap_dashboard.py:0
+msgid "No products to scrap."
+msgstr "Žádné produkty k vyřazení."
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/scrap_dashboard.py:0
+msgid "Product not found for barcode: %s"
+msgstr "Produkt nenalezen pro čárový kód: %s"
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/scrap_config.py:0
+msgid "Default Configuration"
+msgstr "Výchozí nastavení"

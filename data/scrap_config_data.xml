@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default Scrap Configuration -->
+        <record id="default_scrap_barcode_config" model="scrap.barcode.config">
+            <field name="name">Default Configuration</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

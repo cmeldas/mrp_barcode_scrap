@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main menu under Manufacturing -->
+    <menuitem
+        id="menu_mrp_barcode_scrap_root"
+        name="Barcode Scrap"
+        parent="mrp.menu_mrp_root"
+        sequence="50"
+        action="action_scrap_barcode_dashboard"
+    />
+
+    <!-- Configuration submenu -->
+    <menuitem
+        id="menu_mrp_barcode_scrap_config"
+        name="Scrap Configuration"
+        parent="mrp.menu_mrp_configuration"
+        action="action_scrap_barcode_config"
+        sequence="100"
+    />
+</odoo>

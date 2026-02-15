@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mrp_barcode_scrap.Dashboard">
+        <div class="scrap-dashboard o_action o_view_controller">
+
+            <!-- ============================================================ -->
+            <!-- SCANNING MODE                                                -->
+            <!-- ============================================================ -->
+            <t t-if="state.scanning and !state.showResult">
+                <div class="container-fluid py-3">
+                    <!-- Header -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2 class="mb-0">
+                                    <i class="fa fa-barcode me-2"/>
+                                    Barcode Scrap
+                                </h2>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary fs-6">
+                                        <i class="fa fa-list me-1"/>
+                                        <t t-esc="totalItems"/> items
+                                    </span>
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="fa fa-money me-1"/>
+                                        <t t-esc="formatCurrency(totalValue)"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barcode Input Area -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card barcode-input-card">
+                                <div class="card-body py-2">
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-primary text-white">
+                                            <i class="fa fa-barcode fa-lg"/>
+                                        </span>
+                                        <input type="text"
+                                               class="form-control form-control-lg barcode-field"
+                                               t-ref="barcodeInput"
+                                               t-att-value="state.barcode"
+                                               t-on-input="onBarcodeInput"
+                                               t-on-keydown="onBarcodeKeydown"
+                                               placeholder="Scan or type barcode..."
+                                               autocomplete="off"
+                                               autofocus="autofocus"/>
+                                        <span class="input-group-text" t-if="state.loading">
+                                            <i class="fa fa-spinner fa-spin"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Lines -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light py-2">
+                                    <div class="row fw-bold small text-muted">
+                                        <div class="col-1 text-center">#</div>
+                                        <div class="col-1"></div>
+                                        <div class="col-3">Product</div>
+                                        <div class="col-3 text-center">Quantity</div>
+                                        <div class="col-1">UoM</div>
+                                        <div class="col-1 text-end">Unit Price</div>
+                                        <div class="col-1 text-end">Subtotal</div>
+                                        <div class="col-1 text-center">
+                                            <i class="fa fa-cog"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <t t-if="!hasLines">
+                                        <div class="text-center text-muted py-5">
+                                            <i class="fa fa-barcode fa-4x mb-3 d-block opacity-25"/>
+                                            <p class="fs-5">Scan a product barcode to begin</p>
+                                        </div>
+                                    </t>
+                                    <t t-foreach="state.lines" t-as="line" t-key="line.product_id">
+                                        <div class="scrap-line-item border-bottom px-3 py-2"
+                                             t-att-class="{'bg-light-yellow': line.barcode_type === 'weight'}">
+                                            <div class="row align-items-center">
+                                                <div class="col-1 text-center text-muted">
+                                                    <t t-esc="line_index + 1"/>
+                                                </div>
+                                                <div class="col-1">
+                                                    <img t-att-src="line.image_url"
+                                                         class="rounded product-thumb"
+                                                         alt="Product"
+                                                         loading="lazy"
+                                                         onerror="this.style.display='none'"/>
+                                                </div>
+                                                <div class="col-3">
+                                                    <strong><t t-esc="line.product_name"/></strong>
+                                                    <br/>
+                                                    <small class="text-muted">
+                                                        <span t-if="line.barcode_type === 'weight'"
+                                                              class="badge bg-info text-white me-1">
+                                                            <i class="fa fa-balance-scale me-1"/>Weight
+                                                        </span>
+                                                        <span t-if="line.barcode_type === 'unit'"
+                                                              class="badge bg-secondary text-white me-1">
+                                                            <i class="fa fa-cube me-1"/>Pieces
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-3 text-center">
+                                                    <div class="d-flex align-items-center justify-content-center gap-1">
+                                                        <button class="btn btn-outline-secondary btn-sm qty-btn"
+                                                                t-on-click="() => this.decrementQuantity(line_index)">
+                                                            <i class="fa fa-minus"/>
+                                                        </button>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm text-center qty-input"
+                                                               t-att-value="line.quantity"
+                                                               t-on-change="(ev) => this.updateQuantity(line_index, ev)"
+                                                               min="0.001"
+                                                               t-att-max="line.qty_available"
+                                                               step="any"/>
+                                                        <button class="btn btn-outline-secondary btn-sm qty-btn"
+                                                                t-on-click="() => this.incrementQuantity(line_index)">
+                                                            <i class="fa fa-plus"/>
+                                                        </button>
+                                                        <button class="btn btn-outline-info btn-sm qty-btn"
+                                                                t-on-click="() => this.scrapAllStock(line_index)"
+                                                                title="Scrap all in stock">
+                                                            <i class="fa fa-asterisk"/>
+                                                        </button>
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        In stock: <t t-esc="formatQuantity(line.qty_available)"/> <t t-esc="line.uom"/>
+                                                    </small>
+                                                </div>
+                                                <div class="col-1">
+                                                    <span class="text-muted"><t t-esc="line.uom"/></span>
+                                                </div>
+                                                <div class="col-1 text-end">
+                                                    <t t-esc="formatCurrency(line.unit_price)"/>
+                                                </div>
+                                                <div class="col-1 text-end fw-bold">
+                                                    <t t-esc="formatCurrency(line.quantity * line.unit_price)"/>
+                                                </div>
+                                                <div class="col-1 text-center">
+                                                    <button class="btn btn-outline-danger btn-sm"
+                                                            t-on-click="() => this.removeLine(line_index)"
+                                                            title="Remove">
+                                                        <i class="fa fa-trash"/>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scrap Reason -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body py-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <label class="form-label fw-bold mb-0">
+                                                <i class="fa fa-tag me-1"/>
+                                                Scrap Reason:
+                                            </label>
+                                        </div>
+                                        <div class="col">
+                                            <select class="form-select"
+                                                    t-on-change="onReasonTagChange">
+                                                <option value="">-- Select a reason --</option>
+                                                <t t-foreach="state.reasonTags" t-as="tag" t-key="tag.id">
+                                                    <option t-att-value="tag.id"
+                                                            t-att-selected="tag.id === state.scrap_reason_tag_id">
+                                                        <t t-esc="tag.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total and Scrap Button -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card scrap-footer-card">
+                                <div class="card-body py-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="fs-6 text-muted">Total scrap value:</span>
+                                            <span class="fs-3 fw-bold text-danger ms-2">
+                                                <t t-esc="formatCurrency(totalValue)"/>
+                                            </span>
+                                        </div>
+                                        <button class="btn btn-danger btn-lg px-5"
+                                                t-on-click="onScrapClick"
+                                                t-att-disabled="!hasLines || state.loading">
+                                            <i class="fa fa-trash me-2"/>
+                                            Scrap <t t-esc="totalItems"/> product(s)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ============================================================ -->
+            <!-- CONFIRMATION DIALOG (OVERLAY)                                -->
+            <!-- ============================================================ -->
+            <t t-if="state.showConfirmDialog">
+                <div class="scrap-confirm-overlay">
+                    <div class="scrap-confirm-dialog">
+                        <div class="card shadow-lg">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0">
+                                    <i class="fa fa-exclamation-triangle me-2"/>
+                                    Confirm Scrap
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="fs-5">
+                                    Are you sure you want to scrap the following products?
+                                </p>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th class="text-end">Quantity</th>
+                                            <th>UoM</th>
+                                            <th class="text-end">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.lines" t-as="line" t-key="line.product_id">
+                                            <tr>
+                                                <td><t t-esc="line.product_name"/></td>
+                                                <td class="text-end"><t t-esc="formatQuantity(line.quantity)"/></td>
+                                                <td><t t-esc="line.uom"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(line.quantity * line.unit_price)"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="fw-bold">
+                                            <td colspan="3">Total</td>
+                                            <td class="text-end text-danger">
+                                                <t t-esc="formatCurrency(totalValue)"/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div class="mb-3">
+                                    <strong>Reason:</strong>
+                                    <t t-if="selectedReasonTagName">
+                                        <span class="badge bg-info ms-1"><t t-esc="selectedReasonTagName"/></span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-muted">N/A</span>
+                                    </t>
+                                </div>
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-info-circle me-1"/>
+                                    This will create <strong><t t-esc="totalItems"/></strong> scrap order(s) and confirm them immediately.
+                                    This action <strong>cannot be undone</strong>.
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-end gap-2">
+                                <button class="btn btn-secondary btn-lg" t-on-click="cancelConfirm">
+                                    <i class="fa fa-times me-1"/>
+                                    Cancel
+                                </button>
+                                <button class="btn btn-danger btn-lg" t-on-click="confirmScrap">
+                                    <i class="fa fa-check me-1"/>
+                                    Confirm Scrap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ============================================================ -->
+            <!-- RESULT SCREEN (After Scrap)                                  -->
+            <!-- ============================================================ -->
+            <t t-if="state.showResult and state.scrapResult">
+                <div class="container-fluid py-3">
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <div class="scrap-success-icon mb-3">
+                                <i class="fa fa-check-circle text-success fa-5x"/>
+                            </div>
+                            <h2 class="text-success">Scrap Completed Successfully</h2>
+                            <p class="text-muted fs-5">
+                                <t t-esc="state.scrapResult.scrap_count"/> scrap order(s) created and confirmed
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Scrapped Items -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-list me-2"/>
+                                        Scrapped Items
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Scrap Order</th>
+                                                <th>Product</th>
+                                                <th class="text-end">Quantity</th>
+                                                <th>UoM</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.scrapResult.scraps" t-as="scrap" t-key="scrap.id">
+                                                <tr>
+                                                    <td>
+                                                        <a href="#" class="badge bg-primary text-white text-decoration-none"
+                                                           t-on-click="() => this.openScrapOrder(scrap.id)">
+                                                            <i class="fa fa-external-link me-1"/>
+                                                            <t t-esc="scrap.name"/>
+                                                        </a>
+                                                    </td>
+                                                    <td><t t-esc="scrap.product_name"/></td>
+                                                    <td class="text-end"><t t-esc="formatQuantity(scrap.quantity)"/></td>
+                                                    <td><t t-esc="scrap.uom"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Stock Levels -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-cubes me-2"/>
+                                        Current Stock Levels (After Scrap)
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th class="text-end">Current Stock</th>
+                                                <th>UoM</th>
+                                                <th class="text-end">Stock Value</th>
+                                                <th class="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="Object.values(state.scrapResult.stock_after)" t-as="stock" t-key="stock.product_id">
+                                                <tr>
+                                                    <td><strong><t t-esc="stock.product_name"/></strong></td>
+                                                    <td class="text-end"
+                                                        t-att-class="{'text-danger fw-bold': stock.qty_available &lt;= 0}">
+                                                        <t t-esc="formatQuantity(stock.qty_available)"/>
+                                                    </td>
+                                                    <td><t t-esc="stock.uom"/></td>
+                                                    <td class="text-end">
+                                                        <t t-esc="formatCurrency(stock.value)"/>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button class="btn btn-outline-primary btn-sm me-1"
+                                                                t-on-click="() => this.openProductForm(stock.product_id)"
+                                                                title="Open Product">
+                                                            <i class="fa fa-external-link me-1"/>
+                                                            Product
+                                                        </button>
+                                                        <button class="btn btn-outline-warning btn-sm"
+                                                                t-on-click="() => this.openInventoryAdjustment(stock.product_id)"
+                                                                title="Adjust Stock">
+                                                            <i class="fa fa-pencil me-1"/>
+                                                            Update Stock
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Session Button -->
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <button class="btn btn-primary btn-lg px-5"
+                                    t-on-click="startNewSession">
+                                <i class="fa fa-refresh me-2"/>
+                                Start New Scrap Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ============================================================ -->
+            <!-- LOADING OVERLAY                                              -->
+            <!-- ============================================================ -->
+            <t t-if="state.loading and !state.scanning">
+                <div class="scrap-loading-overlay">
+                    <div class="text-center text-white">
+                        <i class="fa fa-spinner fa-spin fa-4x mb-3"/>
+                        <p class="fs-4">Processing scrap orders...</p>
+                    </div>
+                </div>
+            </t>
+
+        </div>
+    </t>
+</templates>

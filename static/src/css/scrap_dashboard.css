@@ -1,0 +1,192 @@
+/* ============================================================
+   MRP Barcode Scrap - Dashboard Styles
+   ============================================================ */
+
+.scrap-dashboard {
+    background-color: #f0f2f5;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    height: calc(100vh - 50px) !important;
+    position: relative;
+}
+
+.scrap-dashboard .container-fluid {
+    padding-bottom: 30px;
+    max-width: 1400px;
+}
+
+/* ---- Cards ---- */
+.scrap-dashboard .card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: box-shadow 0.2s;
+}
+
+.scrap-dashboard .card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* ---- Barcode Input ---- */
+.scrap-dashboard .barcode-input-card {
+    border: 2px solid #007bff;
+    border-radius: 10px;
+}
+
+.scrap-dashboard .barcode-field {
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+}
+
+.scrap-dashboard .barcode-field:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: #007bff;
+}
+
+/* ---- Product Lines ---- */
+.scrap-dashboard .scrap-line-item {
+    transition: background-color 0.15s;
+}
+
+.scrap-dashboard .scrap-line-item:hover {
+    background-color: #f8f9fa;
+}
+
+.scrap-dashboard .scrap-line-item:last-child {
+    border-bottom: none !important;
+}
+
+.scrap-dashboard .bg-light-yellow {
+    background-color: #fff9e6;
+}
+
+.scrap-dashboard .product-thumb {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+/* ---- Quantity Controls ---- */
+.scrap-dashboard .qty-input {
+    width: 90px !important;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.scrap-dashboard .qty-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.scrap-dashboard .qty-btn:hover {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* ---- Footer / Scrap Button ---- */
+.scrap-dashboard .scrap-footer-card {
+    border: 2px solid #dc3545;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+}
+
+/* ---- Confirmation Dialog ---- */
+.scrap-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.scrap-confirm-dialog {
+    width: 700px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.scrap-confirm-dialog .card {
+    border: none;
+    border-radius: 12px;
+}
+
+/* ---- Loading Overlay ---- */
+.scrap-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1060;
+}
+
+/* ---- Result Screen ---- */
+.scrap-success-icon {
+    animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* ---- Badges ---- */
+.scrap-dashboard .badge {
+    font-weight: 500;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .scrap-dashboard .scrap-line-item .row > div {
+        font-size: 0.85rem;
+    }
+    .scrap-dashboard .qty-input {
+        width: 60px !important;
+    }
+    .scrap-confirm-dialog {
+        width: 95vw;
+    }
+}
+
+/* ---- Table Styles in Result ---- */
+.scrap-dashboard .table th,
+.scrap-dashboard .table td {
+    vertical-align: middle;
+    padding: 0.6rem 0.75rem;
+}
+
+/* ---- Print-friendly ---- */
+@media print {
+    .scrap-dashboard {
+        height: auto !important;
+        overflow: visible !important;
+    }
+    .scrap-confirm-overlay,
+    .scrap-loading-overlay {
+        display: none !important;
+    }
+}
