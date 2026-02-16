@@ -16,6 +16,14 @@ Odoo 18 Community Edition addon for batch scrapping products via barcode scannin
 - **Post-scrap stock review** — see updated stock values with links to adjust inventory
 - **Czech translation included**
 
+## Screenshots
+
+![Main](./docs/main_window.png)
+
+![Confirmation](./docs/confirm_window.png)
+
+![Done](./docs/done_window.png)
+
 ## Installation
 
 1. Copy the `mrp_barcode_scrap` folder to your Odoo addons directory.
