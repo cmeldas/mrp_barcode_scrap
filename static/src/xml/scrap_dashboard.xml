@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="mrp_barcode_scrap.Dashboard">
-        <div class="scrap-dashboard o_action o_view_controller">
+        <div class="scrap-dashboard o_action o_view_controller" t-att-class="{'scrap-inventory-mode': state.inventoryMode}">
 
             <!-- ============================================================ -->
             <!-- SCANNING MODE                                                -->
@@ -11,21 +11,39 @@
                     <!-- Header -->
                     <div class="row mb-3">
                         <div class="col-12">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <h2 class="mb-0">
-                                    <i class="fa fa-barcode me-2"/>
-                                    Barcode Scrap
+                                    <t t-if="state.inventoryMode">
+                                        <i class="fa fa-cubes me-2"/>
+                                        <span>Inventory Count</span>
+                                    </t>
+                                    <t t-else="">
+                                        <i class="fa fa-barcode me-2"/>
+                                        <span>Barcode Scrap</span>
+                                    </t>
                                 </h2>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="badge bg-primary fs-6">
                                         <i class="fa fa-list me-1"/>
                                         <t t-esc="totalItems"/> items
                                     </span>
-                                    <span class="badge bg-danger fs-6">
+                                    <span t-if="!state.inventoryMode" class="badge bg-danger fs-6">
                                         <i class="fa fa-money me-1"/>
                                         <t t-esc="formatCurrency(totalValue)"/>
                                     </span>
+                                    <label t-if="state.canInventory"
+                                           class="scrap-mode-switch form-check form-switch mb-0 ms-2"
+                                           title="Inventory count: the scanned quantities become the new stock">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               t-att-checked="state.inventoryMode"
+                                               t-on-change="onToggleInventory"/>
+                                        <span class="form-check-label fw-bold">Inventory</span>
+                                    </label>
                                 </div>
+                            </div>
+                            <div t-if="state.inventoryMode" class="alert alert-info py-2 mt-2 mb-0 small">
+                                <i class="fa fa-info-circle me-1"/>
+                                <span>Scan every piece that is really in stock. The scanned quantities add up and become the new stock; products you do not scan stay unchanged.</span>
                             </div>
                         </div>
                     </div>
@@ -47,6 +65,7 @@
                                                t-on-keydown="onBarcodeKeydown"
                                                placeholder="Scan or type barcode..."
                                                autocomplete="off"
+                                               t-att-disabled="state.applying"
                                                autofocus="autofocus"/>
                                         <span class="input-group-text" t-if="state.loading">
                                             <i class="fa fa-spinner fa-spin"/>
@@ -66,10 +85,19 @@
                                         <div class="col-1 text-center">#</div>
                                         <div class="col-1"></div>
                                         <div class="col-3">Product</div>
-                                        <div class="col-3 text-center">Quantity</div>
+                                        <div class="col-3 text-center">
+                                            <t t-if="state.inventoryMode">Counted</t>
+                                            <t t-else="">Quantity</t>
+                                        </div>
                                         <div class="col-1">UoM</div>
-                                        <div class="col-1 text-end">Unit Price</div>
-                                        <div class="col-1 text-end">Subtotal</div>
+                                        <t t-if="state.inventoryMode">
+                                            <div class="col-1 text-end">In Stock</div>
+                                            <div class="col-1 text-end">Difference</div>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="col-1 text-end">Unit Price</div>
+                                            <div class="col-1 text-end">Subtotal</div>
+                                        </t>
                                         <div class="col-1 text-center">
                                             <i class="fa fa-cog"/>
                                         </div>
@@ -120,32 +148,44 @@
                                                                class="form-control form-control-sm text-center qty-input"
                                                                t-att-value="line.quantity"
                                                                t-on-change="(ev) => this.updateQuantity(line_index, ev)"
-                                                               min="0.001"
-                                                               t-att-max="line.qty_available"
+                                                               t-att-min="state.inventoryMode ? '0' : '0.001'"
+                                                               t-att-max="state.inventoryMode ? undefined : line.qty_available"
                                                                step="any"/>
                                                         <button class="btn btn-outline-secondary btn-sm qty-btn"
                                                                 t-on-click="() => this.incrementQuantity(line_index)">
                                                             <i class="fa fa-plus"/>
                                                         </button>
-                                                        <button class="btn btn-outline-info btn-sm qty-btn"
+                                                        <button t-if="!state.inventoryMode"
+                                                                class="btn btn-outline-info btn-sm qty-btn"
                                                                 t-on-click="() => this.scrapAllStock(line_index)"
                                                                 title="Scrap all in stock">
                                                             <i class="fa fa-asterisk"/>
                                                         </button>
                                                     </div>
-                                                    <small class="text-muted">
+                                                    <small t-if="!state.inventoryMode" class="text-muted">
                                                         In stock: <t t-esc="formatQuantity(line.qty_available)"/> <t t-esc="line.uom"/>
                                                     </small>
                                                 </div>
                                                 <div class="col-1">
                                                     <span class="text-muted"><t t-esc="line.uom"/></span>
                                                 </div>
-                                                <div class="col-1 text-end">
-                                                    <t t-esc="formatCurrency(line.unit_price)"/>
-                                                </div>
-                                                <div class="col-1 text-end fw-bold">
-                                                    <t t-esc="formatCurrency(line.quantity * line.unit_price)"/>
-                                                </div>
+                                                <t t-if="state.inventoryMode">
+                                                    <div class="col-1 text-end"
+                                                         t-att-class="{'text-danger': line.qty_available &lt; 0}">
+                                                        <t t-esc="formatQuantity(line.qty_available)"/>
+                                                    </div>
+                                                    <div class="col-1 text-end fw-bold" t-att-class="differenceClass(lineDifference(line))">
+                                                        <t t-esc="formatDifference(lineDifference(line))"/>
+                                                    </div>
+                                                </t>
+                                                <t t-else="">
+                                                    <div class="col-1 text-end">
+                                                        <t t-esc="formatCurrency(line.unit_price)"/>
+                                                    </div>
+                                                    <div class="col-1 text-end fw-bold">
+                                                        <t t-esc="formatCurrency(line.quantity * line.unit_price)"/>
+                                                    </div>
+                                                </t>
                                                 <div class="col-1 text-center">
                                                     <button class="btn btn-outline-danger btn-sm"
                                                             t-on-click="() => this.removeLine(line_index)"
@@ -162,7 +202,7 @@
                     </div>
 
                     <!-- Scrap Reason -->
-                    <div class="row mb-3">
+                    <div t-if="!state.inventoryMode" class="row mb-3">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-body py-2">
@@ -191,12 +231,27 @@
                         </div>
                     </div>
 
-                    <!-- Total and Scrap Button -->
+                    <!-- Total and Scrap / Apply Inventory Button -->
                     <div class="row">
                         <div class="col-12">
                             <div class="card scrap-footer-card">
                                 <div class="card-body py-3">
-                                    <div class="d-flex justify-content-between align-items-center">
+                                    <div t-if="state.inventoryMode" class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div>
+                                            <span class="fs-6 text-muted">Value of the difference:</span>
+                                            <span class="fs-3 fw-bold ms-2" t-att-class="differenceClass(inventoryDifferenceValue)">
+                                                <t t-esc="formatCurrency(inventoryDifferenceValue)"/>
+                                            </span>
+                                        </div>
+                                        <button class="btn btn-primary btn-lg px-5 inventory-apply-btn"
+                                                t-on-click="onScrapClick"
+                                                t-att-disabled="!hasLines || state.loading || state.applying">
+                                            <i class="fa fa-check me-2"/>
+                                            <span>Apply Inventory Count</span>
+                                            <span class="badge bg-light text-primary ms-2"><t t-esc="totalItems"/></span>
+                                        </button>
+                                    </div>
+                                    <div t-else="" class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <span class="fs-6 text-muted">Total scrap value:</span>
                                             <span class="fs-3 fw-bold text-danger ms-2">
@@ -220,7 +275,74 @@
             <!-- ============================================================ -->
             <!-- CONFIRMATION DIALOG (OVERLAY)                                -->
             <!-- ============================================================ -->
-            <t t-if="state.showConfirmDialog">
+            <t t-if="state.showConfirmDialog and state.inventoryMode">
+                <div class="scrap-confirm-overlay">
+                    <div class="scrap-confirm-dialog">
+                        <div class="card shadow-lg">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0">
+                                    <i class="fa fa-cubes me-2"/>
+                                    <span>Confirm Inventory Count</span>
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="fs-5">
+                                    The stock of these products will be set to the counted quantity:
+                                </p>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th class="text-end">In Stock</th>
+                                            <th class="text-end">Counted</th>
+                                            <th class="text-end">Difference</th>
+                                            <th>UoM</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.lines" t-as="line" t-key="line.product_id">
+                                            <tr>
+                                                <td><t t-esc="line.product_name"/></td>
+                                                <td class="text-end"><t t-esc="formatQuantity(line.qty_available)"/></td>
+                                                <td class="text-end fw-bold"><t t-esc="formatQuantity(line.quantity)"/></td>
+                                                <td class="text-end fw-bold" t-att-class="differenceClass(lineDifference(line))">
+                                                    <t t-esc="formatDifference(lineDifference(line))"/>
+                                                </td>
+                                                <td><t t-esc="line.uom"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="fw-bold">
+                                            <td colspan="3">Value of the difference</td>
+                                            <td class="text-end" colspan="2" t-att-class="differenceClass(inventoryDifferenceValue)">
+                                                <t t-esc="formatCurrency(inventoryDifferenceValue)"/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-info-circle me-1"/>
+                                    <span>The difference is booked as an inventory adjustment in warehouse</span>
+                                    <strong class="ms-1"><t t-esc="state.warehouseName"/></strong>.
+                                    <span>Products you did not scan stay unchanged.</span>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-end gap-2">
+                                <button class="btn btn-secondary btn-lg" t-on-click="cancelConfirm">
+                                    <i class="fa fa-times me-1"/>
+                                    Cancel
+                                </button>
+                                <button class="btn btn-primary btn-lg inventory-confirm-btn" t-on-click="confirmScrap">
+                                    <i class="fa fa-check me-1"/>
+                                    <span>Confirm Inventory Count</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+            <t t-if="state.showConfirmDialog and !state.inventoryMode">
                 <div class="scrap-confirm-overlay">
                     <div class="scrap-confirm-dialog">
                         <div class="card shadow-lg">
@@ -287,6 +409,93 @@
                                     Confirm Scrap
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ============================================================ -->
+            <!-- RESULT SCREEN (After Inventory Count)                        -->
+            <!-- ============================================================ -->
+            <t t-if="state.showResult and state.inventoryResult">
+                <div class="container-fluid py-3">
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <div class="scrap-success-icon mb-3">
+                                <i class="fa fa-check-circle text-success fa-5x"/>
+                            </div>
+                            <h2 class="text-success">Inventory Count Applied</h2>
+                            <p class="text-muted fs-5">
+                                <span>Stock changed for products:</span>
+                                <strong class="ms-1"><t t-esc="state.inventoryResult.changed_count"/></strong>
+                            </p>
+                            <div t-if="state.inventoryResult.skipped.length" class="alert alert-warning d-inline-block">
+                                <span>Skipped (they do not track stock):</span>
+                                <span class="ms-1"><t t-esc="state.inventoryResult.skipped.join(', ')"/></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-cubes me-2"/>
+                                        <span>Stock After the Inventory Count</span>
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th class="text-end">Before</th>
+                                                <th class="text-end">After</th>
+                                                <th class="text-end">Difference</th>
+                                                <th>UoM</th>
+                                                <th class="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.inventoryResult.lines" t-as="res" t-key="res.product_id">
+                                                <tr class="inventory-result-row">
+                                                    <td><strong><t t-esc="res.product_name"/></strong></td>
+                                                    <td class="text-end" t-att-class="{'text-danger': res.qty_before &lt; 0}">
+                                                        <t t-esc="formatQuantity(res.qty_before)"/>
+                                                    </td>
+                                                    <td class="text-end fw-bold"><t t-esc="formatQuantity(res.qty_after)"/></td>
+                                                    <td class="text-end fw-bold" t-att-class="differenceClass(res.difference)">
+                                                        <t t-esc="formatDifference(res.difference)"/>
+                                                    </td>
+                                                    <td><t t-esc="res.uom"/></td>
+                                                    <td class="text-center">
+                                                        <button class="btn btn-outline-primary btn-sm me-1"
+                                                                t-on-click="() => this.openProductForm(res.product_id)"
+                                                                title="Open Product">
+                                                            <i class="fa fa-external-link me-1"/>
+                                                            Product
+                                                        </button>
+                                                        <button class="btn btn-outline-warning btn-sm"
+                                                                t-on-click="() => this.openInventoryAdjustment(res.product_id)"
+                                                                title="Adjust Stock">
+                                                            <i class="fa fa-pencil me-1"/>
+                                                            Update Stock
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <button class="btn btn-primary btn-lg px-5" t-on-click="startNewSession">
+                                <i class="fa fa-refresh me-2"/>
+                                <span>Start New Inventory Count</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -392,7 +601,8 @@
                                                             <i class="fa fa-external-link me-1"/>
                                                             Product
                                                         </button>
-                                                        <button class="btn btn-outline-warning btn-sm"
+                                                        <button t-if="state.canInventory"
+                                                                class="btn btn-outline-warning btn-sm"
                                                                 t-on-click="() => this.openInventoryAdjustment(stock.product_id)"
                                                                 title="Adjust Stock">
                                                             <i class="fa fa-pencil me-1"/>
@@ -429,6 +639,14 @@
                     <div class="text-center text-white">
                         <i class="fa fa-spinner fa-spin fa-4x mb-3"/>
                         <p class="fs-4">Processing scrap orders...</p>
+                    </div>
+                </div>
+            </t>
+            <t t-if="state.applying">
+                <div class="scrap-loading-overlay inventory-applying-overlay">
+                    <div class="text-center text-white">
+                        <i class="fa fa-spinner fa-spin fa-4x mb-3"/>
+                        <p class="fs-4">Saving the inventory count...</p>
                     </div>
                 </div>
             </t>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import models, api
+from odoo import _, models, api
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -12,8 +12,39 @@ class ScrapDashboard(models.Model):
 
     @api.model
     def get_default_config(self):
-        """Get the default scrap configuration."""
-        return self.env['scrap.barcode.config'].get_default_config()
+        """Get the default scrap configuration plus what the inventory mode needs."""
+        config = self.env['scrap.barcode.config'].get_default_config()
+        product_obj = self.env['product.product']
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        config.update({
+            'can_inventory': product_obj._quick_inventory_can_edit(),
+            'warehouse_name': warehouse.name or '',
+            'uid': self.env.uid,
+        })
+        return config
+
+    @api.model
+    def _product_payload(self, product, quantity, barcode_type):
+        """Product info for one scanned barcode (same shape for pieces and weight)."""
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        qty_warehouse = (
+            product.with_context(warehouse_id=warehouse.id).qty_available if warehouse else product.qty_available
+        )
+        return {
+            'success': True,
+            'product_id': product.id,
+            'product_name': product.display_name,
+            'product_uom': product.uom_id.name,
+            'product_uom_id': product.uom_id.id,
+            'quantity': quantity,
+            'barcode_type': barcode_type,
+            'unit_price': product.list_price,
+            'tracking': product.tracking,
+            'is_storable': product.is_storable,
+            'qty_available': product.qty_available,
+            'qty_warehouse': qty_warehouse,
+            'image_url': '/web/image/product.product/%d/image_128' % product.id,
+        }
 
     @api.model
     def get_scrap_reason_tags(self):
@@ -64,40 +95,16 @@ class ScrapDashboard(models.Model):
                             continue
 
             if product:
-                return {
-                    'success': True,
-                    'product_id': product.id,
-                    'product_name': product.display_name,
-                    'product_uom': product.uom_id.name,
-                    'product_uom_id': product.uom_id.id,
-                    'quantity': weight if weight > 0 else 1.0,
-                    'barcode_type': 'weight',
-                    'unit_price': product.list_price,
-                    'tracking': product.tracking,
-                    'qty_available': product.qty_available,
-                    'image_url': '/web/image/product.product/%d/image_128' % product.id,
-                }
+                return self._product_payload(product, weight if weight > 0 else 1.0, 'weight')
 
         # Standard barcode - search by exact match (pieces)
         product = product_obj.search([('barcode', '=', barcode)], limit=1)
         if product:
-            return {
-                'success': True,
-                'product_id': product.id,
-                'product_name': product.display_name,
-                'product_uom': product.uom_id.name,
-                'product_uom_id': product.uom_id.id,
-                'quantity': 1.0,
-                'barcode_type': 'unit',
-                'unit_price': product.list_price,
-                'tracking': product.tracking,
-                'qty_available': product.qty_available,
-                'image_url': '/web/image/product.product/%d/image_128' % product.id,
-            }
+            return self._product_payload(product, 1.0, 'unit')
 
         return {
             'success': False,
-            'error': 'Product not found for barcode: %s' % barcode,
+            'error': _('Product not found for barcode: %s', barcode),
         }
 
     @api.model
@@ -130,7 +137,7 @@ class ScrapDashboard(models.Model):
         :return: dict with created scrap order info and post-scrap stock
         """
         if not scrap_lines:
-            raise UserError("No products to scrap.")
+            raise UserError(_("No products to scrap."))
 
         scrap_obj = self.env['stock.scrap']
         created_scraps = []
@@ -202,4 +209,41 @@ class ScrapDashboard(models.Model):
             'stock_after': stock_after,
             'scrap_count': len(created_scraps),
             'skipped': skipped,
+        }
+
+    # ------------------------------------------------------------------
+    # Inventory mode
+    # ------------------------------------------------------------------
+    @api.model
+    def get_inventory_stock(self, product_ids):
+        """Current on-hand quantity in the main warehouse: {product id: qty}."""
+        products = self.env['product.product'].browse(product_ids).exists()
+        return products._quick_inventory_on_hand()
+
+    @api.model
+    def apply_inventory(self, inventory_lines):
+        """Inventory count from the barcode dashboard: the counted quantity becomes the new stock.
+
+        :param inventory_lines: list of dicts with product_id (int) and quantity (float);
+            several lines of the same product are added up. Products that were not
+            scanned are not changed.
+        :return: dict with per-product results (qty_before, qty_after, difference)
+        """
+        if not inventory_lines:
+            raise UserError(_("No products to count."))
+        counted = {}
+        for line in inventory_lines:
+            product_id = int(line['product_id'])
+            counted[product_id] = counted.get(product_id, 0.0) + float(line.get('quantity') or 0.0)
+        products = self.env['product.product'].browse(list(counted)).exists()
+        skipped = products.filtered(lambda p: not p.is_storable)
+        counted = {p.id: counted[p.id] for p in products - skipped}
+        results = self.env['product.product']._quick_inventory_apply(counted, _("Inventory count (barcode)")) if counted else []
+        warehouse = self.env['product.product']._quick_inventory_warehouse()
+        return {
+            'success': True,
+            'lines': results,
+            'changed_count': len([r for r in results if r['difference']]),
+            'skipped': skipped.mapped('display_name'),
+            'warehouse_name': warehouse.name,
         }

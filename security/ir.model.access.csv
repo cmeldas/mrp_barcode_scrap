@@ -3,3 +3,5 @@ access_scrap_barcode_config_user,scrap.barcode.config.user,model_scrap_barcode_c
 access_scrap_barcode_config_manager,scrap.barcode.config.manager,model_scrap_barcode_config,mrp.group_mrp_manager,1,1,1,1
 access_scrap_dashboard_user,scrap.dashboard.user,model_scrap_dashboard,mrp.group_mrp_user,1,1,1,0
 access_scrap_dashboard_manager,scrap.dashboard.manager,model_scrap_dashboard,mrp.group_mrp_manager,1,1,1,1
+access_stock_quick_update_manager,stock.quick.update.manager,model_stock_quick_update,stock.group_stock_manager,1,1,1,1
+access_stock_quick_update_line_manager,stock.quick.update.line.manager,model_stock_quick_update_line,stock.group_stock_manager,1,1,1,1

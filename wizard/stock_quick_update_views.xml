@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_quick_update_form" model="ir.ui.view">
+        <field name="name">stock.quick.update.form</field>
+        <field name="model">stock.quick.update</field>
+        <field name="arch" type="xml">
+            <form string="Update Stock">
+                <field name="zero" invisible="1"/>
+                <p class="text-muted mb-2" invisible="zero">
+                    Enter the quantity that is really in stock. The difference is booked as an inventory adjustment
+                    in warehouse <field name="warehouse_id" class="oe_inline" readonly="1" options="{'no_open': True}"/>.
+                </p>
+                <p class="mb-2" invisible="not zero">
+                    The stock of these products will be set to 0 in warehouse
+                    <field name="warehouse_id" class="oe_inline" readonly="1" options="{'no_open': True}"/>.
+                    Products that already have zero stock are not listed.
+                </p>
+                <field name="line_ids" nolabel="1">
+                    <list editable="bottom" create="0" delete="1">
+                        <field name="product_id" readonly="1"/>
+                        <field name="qty_current" readonly="1" decoration-danger="qty_current &lt; 0"/>
+                        <field name="qty_new" readonly="parent.zero"/>
+                        <field name="qty_difference" readonly="1"
+                               decoration-danger="qty_difference &lt; 0" decoration-success="qty_difference &gt; 0"/>
+                        <field name="uom_id" readonly="1" groups="uom.group_uom"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_apply" type="object" string="Apply" class="btn-primary" data-hotkey="q"
+                            invisible="zero"/>
+                    <button name="action_apply" type="object" string="Set Stock to Zero" class="btn-danger" data-hotkey="q"
+                            invisible="not zero"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

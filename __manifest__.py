@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MRP Barcode Scrap',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Manufacturing',
-    'summary': 'Scan barcodes of expiring products and scrap them at once',
+    'summary': 'Scan barcodes of expiring products and scrap them at once, or count the stock',
     'description': """
 MRP Barcode Scrap
 =================
@@ -12,6 +12,7 @@ Scan barcodes from products that expire and scrap them at once.
 Supports both weight-embedded barcodes and piece-count products.
 
 Features:
+
 - POS-like barcode scanning interface
 - Automatic barcode nomenclature detection (weight / pieces)
 - Running totals per scanned product
@@ -20,6 +21,9 @@ Features:
 - Total scrap value display
 - Batch scrap document creation and confirmation
 - Post-scrap stock level review with links to adjust
+- Inventory count mode (switch in the top right corner): the scanned
+  quantities add up and become the new stock of the scanned products
+- Update Stock and Set Stock to Zero buttons on the product and variant form
 - Czech translation included
     """,
     'author': 'Custom',
@@ -36,6 +40,8 @@ Features:
         'views/scrap_config_views.xml',
         'views/scrap_dashboard_views.xml',
         'views/menu_views.xml',
+        'views/product_views.xml',
+        'wizard/stock_quick_update_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
