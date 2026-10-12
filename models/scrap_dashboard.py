@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import _, models, api
+from odoo import _, Command, models, api
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -123,84 +123,87 @@ class ScrapDashboard(models.Model):
             }
         return result
 
+    # ------------------------------------------------------------------
+    # Scrapping
+    # ------------------------------------------------------------------
     @api.model
-    def create_scrap_orders(self, scrap_lines, scrap_reason_tag_ids):
-        """
-        Create and confirm scrap orders for each product line.
-        Quantities are capped at current stock to prevent negative inventory.
+    def create_scrap_moves(self, scrap_lines, scrap_reason_tag_ids):
+        """Scrap the scanned products: one done scrap move per product line.
+
+        Odoo 20 has no stock.scrap any more: a scrap is a stock.move with is_scrap,
+        from the stock location of the main warehouse to the scrap location of the
+        company, reference from the stock.scrap sequence (SP/xxxxx) and the reason
+        tags in scrap_reason_tag_ids (the same as Inventory › Operations › Adjustments › Scrap creates).
+        Quantities are capped at the stock of the warehouse stock location (with its
+        sub-locations) so the stock never goes negative; products without stock are
+        skipped.
 
         :param scrap_lines: list of dicts with keys:
             - product_id (int)
             - quantity (float)
-            - product_uom_id (int)
+            - product_uom_id (int, optional; the product unit otherwise)
         :param scrap_reason_tag_ids: list of int IDs of stock.scrap.reason.tag
-        :return: dict with created scrap order info and post-scrap stock
+        :return: dict with the scrap moves and the stock after the scrap
         """
         if not scrap_lines:
             raise UserError(_("No products to scrap."))
 
-        scrap_obj = self.env['stock.scrap']
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        if not warehouse:
+            raise UserError(_("No warehouse found for company %s.", self.env.company.display_name))
+        location = warehouse.lot_stock_id
+        scrap_location = self.env.company.scrap_location_id
+        tags = self.env['stock.scrap.reason.tag'].browse(scrap_reason_tag_ids or []).exists()
+
         created_scraps = []
         product_ids = []
         skipped = []
-
-        # Get default scrap location
-        warehouse = self.env['stock.warehouse'].search(
-            [('company_id', '=', self.env.company.id)], limit=1
-        )
-        location_id = warehouse.lot_stock_id if warehouse else False
-
         for line in scrap_lines:
             product = self.env['product.product'].browse(line['product_id'])
             if not product.exists():
                 _logger.warning("Product ID %s not found, skipping.", line['product_id'])
                 continue
+            uom = self.env['uom.uom'].browse(line.get('product_uom_id') or product.uom_id.id).exists() or product.uom_id
 
-            # Cap quantity at available stock — never go negative
-            qty_available = product.qty_available
-            scrap_qty = min(line['quantity'], qty_available)
-            if scrap_qty <= 0:
+            # Cap quantity at the stock of the location (sub-locations included) — never go negative.
+            # Products that do not track stock have none, so they are skipped as in Odoo 19.
+            requested = uom._compute_quantity(float(line.get('quantity') or 0.0), product.uom_id)
+            qty_available = product.with_context(location=location.id).qty_available
+            scrap_qty = product.uom_id.round(min(requested, qty_available))
+            if product.uom_id.compare(scrap_qty, 0.0) <= 0:
                 skipped.append(product.display_name)
                 _logger.info(
                     "Product %s has no stock (%.3f), skipping scrap.",
-                    product.display_name, qty_available
+                    product.display_name, qty_available,
                 )
                 continue
 
-            vals = {
+            move = self.env['stock.move'].create({
+                'is_scrap': True,
                 'product_id': product.id,
-                'product_uom_id': line.get('product_uom_id', product.uom_id.id),
-            }
-
-            # Set scrap reason tags
-            if scrap_reason_tag_ids:
-                vals['scrap_reason_tag_ids'] = [(6, 0, scrap_reason_tag_ids)]
-
-            if location_id:
-                vals['location_id'] = location_id.id
-
-            scrap_order = scrap_obj.create(vals)
-            # Use write() to force DB flush of scrap_qty — direct assignment
-            # may not persist before action_validate reads the stock move qty.
-            # Also invalidate cache to ensure action_validate sees fresh value.
-            scrap_order.write({'scrap_qty': scrap_qty})
-            self.env.invalidate_all()
-
-            # Validate immediately so the stock move uses the correct qty
-            # before any subsequent create can trigger field recomputes
-            scrap_order.action_validate()
+                'uom_id': product.uom_id.id,
+                'product_uom_qty': scrap_qty,
+                'quantity': scrap_qty,
+                'location_id': location.id,
+                'location_dest_id': scrap_location.id,
+                'company_id': self.env.company.id,
+                'scrap_reason_tag_ids': [Command.set(tags.ids)],
+            })
+            # The availability is checked above, so no "Insufficient Quantity" wizard here
+            # (action_scrap would return it instead of scrapping).
+            move._action_scrap()
 
             product_ids.append(product.id)
             created_scraps.append({
-                'id': scrap_order.id,
-                'name': scrap_order.name,
+                'id': move.id,
+                'name': move.reference,
                 'product_name': product.display_name,
-                'quantity': scrap_qty,
+                'quantity': move.quantity,
                 'uom': product.uom_id.name,
+                'capped': product.uom_id.compare(scrap_qty, requested) < 0,
             })
 
-        # Get updated stock levels
-        unique_product_ids = list(set(product_ids))
+        unique_product_ids = list(dict.fromkeys(product_ids))
         stock_after = self.get_product_stock(unique_product_ids)
 
         return {
@@ -210,6 +213,31 @@ class ScrapDashboard(models.Model):
             'scrap_count': len(created_scraps),
             'skipped': skipped,
         }
+
+    @api.model
+    def action_open_scraps(self, move_ids):
+        """Scrap form (one move) or list (several) of the given scrap moves, as Inventory › Scrap shows them."""
+        moves = self.env['stock.move'].browse(move_ids).exists().filtered('is_scrap')
+        action = {
+            'type': 'ir.actions.act_window',
+            'name': _("Scraps"),
+            'res_model': 'stock.move',
+            'context': {'default_is_scrap': True, 'create': False},
+        }
+        form_view = self.env.ref('stock.view_scrap_move_form')
+        if len(moves) == 1:
+            action.update({
+                'res_id': moves.id,
+                'views': [(form_view.id, 'form')],
+                'target': 'new',
+            })
+        else:
+            action.update({
+                'domain': [('id', 'in', moves.ids)],
+                'views': [(self.env.ref('stock.view_scrap_move_list').id, 'list'), (form_view.id, 'form')],
+                'target': 'current',
+            })
+        return action
 
     # ------------------------------------------------------------------
     # Inventory mode

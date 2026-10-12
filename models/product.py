@@ -9,7 +9,6 @@ moves history with its own reference.
 """
 from odoo import _, api, models
 from odoo.exceptions import AccessError, UserError
-from odoo.tools import float_compare, float_is_zero
 
 
 class ProductProduct(models.Model):
@@ -84,11 +83,12 @@ class ProductProduct(models.Model):
         Quant = self.env["stock.quant"].with_context(inventory_mode=True, inventory_name=inventory_name)
         to_apply = Quant
         for product in products:
-            rounding = product.uom_id.rounding
-            target = product.uom_id.round(quantities[product.id] or 0.0)
-            if float_compare(target, 0.0, precision_rounding=rounding) < 0:
+            uom = product.uom_id
+            target = uom.round(quantities[product.id] or 0.0)
+            if uom.compare(target, 0.0) < 0:
                 raise UserError(_("The quantity of %s cannot be negative.", product.display_name))
-            if product.tracking != "none" and not float_is_zero(target, precision_rounding=rounding):
+            # Odoo 20: untracked is False (19 had "none", which a migrated database may still hold)
+            if product.tracking in ("lot", "serial") and not uom.is_zero(target):
                 raise UserError(_(
                     "%s is tracked by lots or serial numbers. Count it in Inventory › Operations › Adjustments › Physical Inventory.",
                     product.display_name,
@@ -99,14 +99,14 @@ class ProductProduct(models.Model):
             )
             # Everything outside the main quant goes to zero, the main quant gets the whole target.
             for quant in quants - main[:1]:
-                if not float_is_zero(quant.quantity, precision_rounding=rounding):
+                if not uom.is_zero(quant.quantity):
                     quant.inventory_quantity = 0.0
                     to_apply |= quant
             if main:
-                if float_compare(main[0].quantity, target, precision_rounding=rounding) != 0:
+                if uom.compare(main[0].quantity, target) != 0:
                     main[0].inventory_quantity = target
                     to_apply |= main[0]
-            elif not float_is_zero(target, precision_rounding=rounding):
+            elif not uom.is_zero(target):
                 to_apply |= Quant.create({
                     "product_id": product.id,
                     "location_id": warehouse.lot_stock_id.id,

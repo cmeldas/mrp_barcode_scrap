@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.0-20260817\n"
+"Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 14:47+0000\n"
-"PO-Revision-Date: 2026-09-29 14:47+0000\n"
+"POT-Creation-Date: 2026-10-11 07:34+0000\n"
+"PO-Revision-Date: 2026-10-11 07:34+0000\n"
 "Last-Translator: \n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -15,6 +15,32 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#. module: mrp_barcode_scrap
+#: model:ir.module.module,description:base.module_mrp_barcode_scrap
+msgid ""
+"\n"
+"MRP Barcode Scrap\n"
+"=================\n"
+"\n"
+"Scan barcodes from products that expire and scrap them at once.\n"
+"Supports both weight-embedded barcodes and piece-count products.\n"
+"\n"
+"Features:\n"
+"\n"
+"- POS-like barcode scanning interface\n"
+"- Automatic barcode nomenclature detection (weight / pieces)\n"
+"- Running totals per scanned product\n"
+"- Editable quantities\n"
+"- Configurable default scrap reason\n"
+"- Total scrap value display\n"
+"- Batch scrapping: one done scrap per product (Inventory › Operations › Adjustments › Scrap)\n"
+"- Post-scrap stock level review with links to adjust\n"
+"- Inventory count mode (switch in the top right corner): the scanned\n"
+"  quantities add up and become the new stock of the scanned products\n"
+"- Update Stock and Set Stock to Zero buttons on the product and variant form\n"
+"- Czech translation included\n"
+msgstr ""
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
@@ -37,8 +63,8 @@ msgstr ""
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
-msgid "%s scrap order(s) created and confirmed"
-msgstr "%s objednávka(y) vyřazení vytvořena a potvrzena"
+msgid "%s product(s) scrapped"
+msgstr "Vyřazeno produktů: %s"
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
@@ -242,14 +268,14 @@ msgstr "Inventuru se nepodařilo uložit"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
-msgid "Error creating scrap orders"
-msgstr "Chyba při vytváření objednávek vyřazení"
+msgid "Error scanning barcode"
+msgstr "Chyba při skenování čárového kódu"
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
-msgid "Error scanning barcode"
-msgstr "Chyba při skenování čárového kódu"
+msgid "Error while scrapping"
+msgstr "Chyba při vyřazování"
 
 #. module: mrp_barcode_scrap
 #: model:ir.model.fields,field_description:mrp_barcode_scrap.field_product_product__id
@@ -328,6 +354,17 @@ msgstr "Naposledy upraveno"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Less than scanned: capped at the stock"
+msgstr "Méně, než bylo naskenováno: omezeno stavem skladu"
+
+#. module: mrp_barcode_scrap
+#: model:ir.module.module,shortdesc:base.module_mrp_barcode_scrap
+msgid "MRP Barcode Scrap"
+msgstr "Vyřazení čárovým kódem"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "N/A"
 msgstr "neuvedeno"
 
@@ -368,6 +405,7 @@ msgstr "Žádné produkty k vyřazení."
 #. module: mrp_barcode_scrap
 #. odoo-python
 #: code:addons/mrp_barcode_scrap/models/product.py:0
+#: code:addons/mrp_barcode_scrap/models/scrap_dashboard.py:0
 msgid "No warehouse found for company %s."
 msgstr "Firma %s nemá žádný sklad."
 
@@ -396,6 +434,12 @@ msgid "Open Product"
 msgstr "Otevřít produkt"
 
 #. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Open Scraps"
+msgstr "Otevřít vyřazení"
+
+#. module: mrp_barcode_scrap
 #: model:ir.model.fields,help:mrp_barcode_scrap.field_stock_quick_update__zero
 msgid ""
 "Opened from the list action Set Stock to Zero: new stock prefilled with 0."
@@ -407,12 +451,6 @@ msgstr ""
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "Pieces"
 msgstr "Kusy"
-
-#. module: mrp_barcode_scrap
-#. odoo-javascript
-#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
-msgid "Processing scrap orders..."
-msgstr "Zpracovávám objednávky vyřazení..."
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
@@ -447,6 +485,14 @@ msgstr "Produkty"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid ""
+"Products to scrap right away (one scrap per product, Inventory › Operations "
+"› Adjustments › Scrap):"
+msgstr "Produkty k okamžitému vyřazení (jedno vyřazení na produkt, Sklady › Operace › Úpravy inventáře › Vyřazení zásob):"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "Products you did not scan stay unchanged."
 msgstr "Nenaskenované produkty zůstanou beze změny."
 
@@ -475,6 +521,12 @@ msgstr "Důvod:"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Reference"
+msgstr "Reference"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "Remove"
 msgstr "Odebrat"
 
@@ -489,6 +541,13 @@ msgstr "Ukládám inventuru..."
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "Scan a product barcode to begin"
 msgstr "Naskenujte čárový kód produktu pro začátek"
+
+#. module: mrp_barcode_scrap
+#: model:ir.module.module,summary:base.module_mrp_barcode_scrap
+msgid ""
+"Scan barcodes of expiring products and scrap them at once, or count the "
+"stock"
+msgstr "Naskenujte čárové kódy prošlých produktů a vyřaďte je najednou, nebo spočítejte sklad"
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
@@ -544,12 +603,6 @@ msgstr "Panel vyřazení"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
-msgid "Scrap Order"
-msgstr "Objednávka vyřazení"
-
-#. module: mrp_barcode_scrap
-#. odoo-javascript
-#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "Scrap Reason:"
 msgstr "Důvod vyřazení:"
 
@@ -566,12 +619,29 @@ msgid "Scrapped Items"
 msgstr "Vyřazené položky"
 
 #. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrapped products:"
+msgstr "Vyřazené produkty:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrapping..."
+msgstr "Vyřazuji..."
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/scrap_dashboard.py:0
+msgid "Scraps"
+msgstr "Vyřazení zásob"
+
+#. module: mrp_barcode_scrap
 #. odoo-python
 #: code:addons/mrp_barcode_scrap/models/product.py:0
 #: model:ir.actions.server,name:mrp_barcode_scrap.action_product_product_quick_stock_zero
 #: model:ir.actions.server,name:mrp_barcode_scrap.action_product_template_quick_stock_zero
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_template_form_view_quick_stock
-#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_variant_easy_edit_view_quick_stock
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.view_stock_quick_update_form
 msgid "Set Stock to Zero"
 msgstr "Vynulovat sklad"
@@ -583,7 +653,6 @@ msgstr "Nastavit skladové množství tohoto produktu (všech jeho variant) na 0
 
 #. module: mrp_barcode_scrap
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_normal_form_view_quick_stock
-#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_variant_easy_edit_view_quick_stock
 msgid "Set the on-hand quantity of this variant to 0?"
 msgstr "Nastavit skladové množství této varianty na 0?"
 
@@ -591,6 +660,12 @@ msgstr "Nastavit skladové množství této varianty na 0?"
 #: model:ir.model.fields,field_description:mrp_barcode_scrap.field_stock_quick_update__zero
 msgid "Set to Zero"
 msgstr "Vynulovat"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Skipped (no stock):"
+msgstr "Přeskočeno (bez skladu):"
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
@@ -720,16 +795,16 @@ msgid "These products do not track stock: %s"
 msgstr "Tyto produkty nesledují sklad: %s"
 
 #. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "This action"
+msgstr "Tuto akci"
+
+#. module: mrp_barcode_scrap
 #. odoo-python
 #: code:addons/mrp_barcode_scrap/models/product.py:0
 msgid "This product does not track stock."
 msgstr "Tento produkt nesleduje sklad."
-
-#. module: mrp_barcode_scrap
-#. odoo-javascript
-#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
-msgid "This will create"
-msgstr "Vytvoří se"
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript
@@ -772,7 +847,6 @@ msgstr "JM"
 #: code:addons/mrp_barcode_scrap/models/product.py:0
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_template_form_view_quick_stock
-#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_variant_easy_edit_view_quick_stock
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.view_stock_quick_update_form
 msgid "Update Stock"
 msgstr "Upravit sklad"
@@ -820,6 +894,12 @@ msgstr "nelze vrátit zpět"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "capped"
+msgstr "omezeno"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "items"
 msgstr "položek"
 
@@ -828,19 +908,3 @@ msgstr "položek"
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "product(s)"
 msgstr "produkt(y)"
-
-#. module: mrp_barcode_scrap
-#. odoo-javascript
-#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
-msgid ""
-"scrap order(s) and confirm them immediately.\n"
-"                                    This action"
-msgstr ""
-"objednávek vyřazení a hned se potvrdí.\n"
-"                                    Tuto akci"
-
-#. module: mrp_barcode_scrap
-#. odoo-javascript
-#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
-msgid "scrap order(s) created and confirmed"
-msgstr "objednávka(y) vyřazení vytvořena a potvrzena"

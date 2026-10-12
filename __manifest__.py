@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MRP Barcode Scrap',
-    'version': '19.0.1.1.0',
+    'version': '20.0.1.1.0',
     'category': 'Manufacturing',
     'summary': 'Scan barcodes of expiring products and scrap them at once, or count the stock',
     'description': """
@@ -19,14 +19,14 @@ Features:
 - Editable quantities
 - Configurable default scrap reason
 - Total scrap value display
-- Batch scrap document creation and confirmation
+- Batch scrapping: one done scrap per product (Inventory › Operations › Adjustments › Scrap)
 - Post-scrap stock level review with links to adjust
 - Inventory count mode (switch in the top right corner): the scanned
   quantities add up and become the new stock of the scanned products
 - Update Stock and Set Stock to Zero buttons on the product and variant form
 - Czech translation included
     """,
-    'author': 'Custom',
+    'author': 'Matouš Čmelík',
     'license': 'LGPL-3',
     'depends': [
         'mrp',
@@ -35,7 +35,7 @@ Features:
         'product',
     ],
     'data': [
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
         'data/scrap_config_data.xml',
         'views/scrap_config_views.xml',
         'views/scrap_dashboard_views.xml',

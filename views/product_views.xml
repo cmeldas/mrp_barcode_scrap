@@ -11,10 +11,10 @@
             <xpath expr="//sheet[@name='product_form']" position="before">
                 <header>
                     <button name="action_quick_stock_update" type="object" string="Update Stock"
-                            class="btn-primary" icon="fa-pencil"
+                            class="btn-primary" icon="edit"
                             invisible="not is_storable or not id" groups="stock.group_stock_manager"/>
                     <button name="action_quick_stock_zero" type="object" string="Set Stock to Zero"
-                            class="btn-secondary" icon="fa-ban"
+                            class="btn-secondary" icon="block"
                             invisible="not is_storable or not id" groups="stock.group_stock_manager"
                             confirm="Set the on-hand quantity of this product (all its variants) to 0?"/>
                 </header>
@@ -44,7 +44,8 @@
     </record>
 
     <!-- The product.product form gets the template header above; there the zero button
-         only changes that one variant, so the question must say so. -->
+         only changes that one variant, so the question must say so. Odoo 20 opens variants
+         (Variants button of the template) in this form too, product_variant_easy_edit_view is gone. -->
     <record id="product_normal_form_view_quick_stock" model="ir.ui.view">
         <field name="name">product.product.form.quick.stock</field>
         <field name="model">product.product</field>
@@ -52,26 +53,6 @@
         <field name="arch" type="xml">
             <xpath expr="//button[@name='action_quick_stock_zero']" position="attributes">
                 <attribute name="confirm">Set the on-hand quantity of this variant to 0?</attribute>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Variant form opened from the template's Variants button -->
-    <record id="product_variant_easy_edit_view_quick_stock" model="ir.ui.view">
-        <field name="name">product.product.variant.form.quick.stock</field>
-        <field name="model">product.product</field>
-        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//form/sheet" position="before">
-                <header>
-                    <button name="action_quick_stock_update" type="object" string="Update Stock"
-                            class="btn-primary" icon="fa-pencil"
-                            invisible="not is_storable or not id" groups="stock.group_stock_manager"/>
-                    <button name="action_quick_stock_zero" type="object" string="Set Stock to Zero"
-                            class="btn-secondary" icon="fa-ban"
-                            invisible="not is_storable or not id" groups="stock.group_stock_manager"
-                            confirm="Set the on-hand quantity of this variant to 0?"/>
-                </header>
             </xpath>
         </field>
     </record>

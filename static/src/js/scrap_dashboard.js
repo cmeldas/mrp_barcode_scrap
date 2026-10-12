@@ -1,28 +1,30 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { Component, useState, onWillStart, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, proxy, signal, usePlugin, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { _t } from "@web/core/l10n/translation";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 /** Rounding of summed quantities (weights are in kg with grams). */
 const QTY_DIGITS = 1000;
 
 export class ScrapBarcodeDashboard extends Component {
     static template = "mrp_barcode_scrap.Dashboard";
-    static props = ["*"];
+
+    // Owl 3: props through useProps (static props would throw), refs are signals
+    props = useProps(standardActionServiceProps);
+    barcodeInput = signal.ref();
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
-        this.notification = useService("notification");
-        this.dialog = useService("dialog");
+        this.action = usePlugin(ActionPlugin);
+        this.notification = usePlugin(NotificationPlugin);
+        this.dialog = usePlugin(DialogPlugin);
 
-        this.barcodeInput = useRef("barcodeInput");
-
-        this.state = useState({
+        this.state = proxy({
             // Scanning state
             lines: [],          // [{product_id, product_name, quantity, uom, unit_price, barcode_type, product_uom_id, image_url, tracking, qty_available, is_storable}]
             scrap_reason_tag_id: false,
@@ -45,7 +47,7 @@ export class ScrapBarcodeDashboard extends Component {
             showResult: false,
 
             // Result state
-            scrapResult: null,  // {scraps, stock_after, scrap_count, skipped}
+            scrapResult: null,  // {scraps, stock_after, scrap_count, skipped} (scraps = scrap moves)
             inventoryResult: null,  // {lines, changed_count, skipped, warehouse_name}
         });
 
@@ -63,6 +65,7 @@ export class ScrapBarcodeDashboard extends Component {
 
         onWillUnmount(() => {
             document.removeEventListener("keydown", this._onKeyDown);
+            this._audioContext?.close().catch(() => {});
         });
     }
 
@@ -193,8 +196,9 @@ export class ScrapBarcodeDashboard extends Component {
     }
 
     _focusBarcodeInput() {
-        if (this.barcodeInput.el) {
-            this.barcodeInput.el.focus();
+        const input = this.barcodeInput();
+        if (input) {
+            input.focus();
         }
     }
 
@@ -288,7 +292,7 @@ export class ScrapBarcodeDashboard extends Component {
             );
             return false;
         }
-        if (productInfo.tracking && productInfo.tracking !== "none") {
+        if (["lot", "serial"].includes(productInfo.tracking)) { // untracked: false in Odoo 20, "none" in 19
             this.notification.add(
                 _t("%s is tracked by lots or serial numbers. Count it in Inventory › Operations › Adjustments › Physical Inventory.", productInfo.product_name),
                 { type: "danger", title: _t("Barcode Error") }
@@ -322,16 +326,28 @@ export class ScrapBarcodeDashboard extends Component {
         return Math.round((value || 0) * QTY_DIGITS) / QTY_DIGITS;
     }
 
+    /**
+     * Short beep generated in the browser: high and short on success, low and longer on error.
+     * (The sound files the module used to point to never existed, every scan ended in a 404.)
+     */
     _playSound(type) {
         try {
-            const audio = new Audio(
-                type === "success"
-                    ? "/mrp_barcode_scrap/static/src/sounds/beep.mp3"
-                    : "/mrp_barcode_scrap/static/src/sounds/error.mp3"
-            );
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
-        } catch (e) {
+            const AudioContext = browser.AudioContext || browser.webkitAudioContext;
+            const activation = browser.navigator.userActivation;
+            // Browsers allow sound only after a user gesture (a scan from the scanner is a key press)
+            if (!AudioContext || (activation && !activation.hasBeenActive)) {
+                return;
+            }
+            this._audioContext ||= new AudioContext();
+            const ctx = this._audioContext;
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+            oscillator.frequency.value = type === "success" ? 1200 : 220;
+            gain.gain.value = 0.1;
+            oscillator.connect(gain).connect(ctx.destination);
+            oscillator.start();
+            oscillator.stop(ctx.currentTime + (type === "success" ? 0.08 : 0.3));
+        } catch {
             // Sound not essential
         }
     }
@@ -483,7 +499,7 @@ export class ScrapBarcodeDashboard extends Component {
 
             const result = await this.orm.call(
                 "scrap.dashboard",
-                "create_scrap_orders",
+                "create_scrap_moves",
                 [scrapLines, this.state.scrap_reason_tag_id ? [this.state.scrap_reason_tag_id] : []]
             );
 
@@ -492,13 +508,13 @@ export class ScrapBarcodeDashboard extends Component {
                 this.state.showResult = true;
                 this.state.scanning = false;
                 this.notification.add(
-                    _t("%s scrap order(s) created and confirmed", result.scrap_count),
+                    _t("%s product(s) scrapped", result.scrap_count),
                     { type: "success" }
                 );
             }
         } catch (error) {
             this.notification.add(
-                error.message || _t("Error creating scrap orders"),
+                error.data?.message || error.message || _t("Error while scrapping"),
                 { type: "danger" }
             );
         }
@@ -545,14 +561,10 @@ export class ScrapBarcodeDashboard extends Component {
     // Post-scrap Actions
     // -------------------------------------------------------------------------
 
-    openScrapOrder(scrapId) {
-        this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: "stock.scrap",
-            res_id: scrapId,
-            views: [[false, "form"]],
-            target: "new",
-        });
+    /** Scrap move(s) in the Inventory › Scrap views (Odoo 20: a scrap is a stock.move with is_scrap). */
+    async openScraps(moveIds) {
+        const action = await this.orm.call("scrap.dashboard", "action_open_scraps", [moveIds]);
+        this.action.doAction(action);
     }
 
     openProductForm(productId) {
@@ -565,7 +577,7 @@ export class ScrapBarcodeDashboard extends Component {
         });
     }
 
-    /** Update Stock dialog of the product (Odoo 19 has no action_update_quantity_on_hand any more). */
+    /** Update Stock dialog of the product (the module's own wizard, same as the button on the product form). */
     async openInventoryAdjustment(productId) {
         const action = await this.orm.call(
             "product.product",

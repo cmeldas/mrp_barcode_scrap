@@ -10,6 +10,8 @@ class TestQuickInventory(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # References and messages are compared in English, also in a database with Czech loaded
+        cls.env = cls.env(context=dict(cls.env.context, lang="en_US"))
         cls.env.user.group_ids |= cls.env.ref("stock.group_stock_manager")
         cls.warehouse = cls.env["stock.warehouse"].search([("company_id", "=", cls.env.company.id)], limit=1)
         cls.stock = cls.warehouse.lot_stock_id
