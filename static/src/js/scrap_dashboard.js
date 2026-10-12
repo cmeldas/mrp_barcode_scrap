@@ -17,6 +17,9 @@ export class ScrapBarcodeDashboard extends Component {
         this.barcodeInput = useRef("barcodeInput");
 
         this.state = useState({
+            // Mode: 'scrap' or 'inventory'
+            mode: 'scrap',
+
             // Scanning state
             lines: [],          // [{product_id, product_name, quantity, uom, unit_price, barcode_type, product_uom_id, image_url, tracking, qty_available}]
             scrap_reason_tag_id: false,
@@ -33,6 +36,7 @@ export class ScrapBarcodeDashboard extends Component {
 
             // Result state
             scrapResult: null,  // {scraps, stock_after, scrap_count, skipped}
+            inventoryResult: null, // {adjustments, stock_after, count}
         });
 
         onWillStart(async () => {
@@ -68,6 +72,23 @@ export class ScrapBarcodeDashboard extends Component {
     // -------------------------------------------------------------------------
     // Barcode Handling
     // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // Mode Toggle
+    // -------------------------------------------------------------------------
+
+    setMode(mode) {
+        if (this.state.mode === mode) return;
+        this.state.mode = mode;
+        this.state.lines = [];
+        this.state.barcode = "";
+        this.state.showConfirmDialog = false;
+        this.state.showResult = false;
+        this.state.scrapResult = null;
+        this.state.inventoryResult = null;
+        this.state.scanning = true;
+        setTimeout(() => this._focusBarcodeInput(), 50);
+    }
 
     _handleKeyDown(ev) {
         // If confirm dialog is showing, don't capture keys
@@ -127,20 +148,23 @@ export class ScrapBarcodeDashboard extends Component {
     }
 
     _addOrUpdateLine(productInfo) {
+        const isScrap = this.state.mode === 'scrap';
         const existing = this.state.lines.find(
             (l) => l.product_id === productInfo.product_id
         );
         if (existing) {
-            // Cap at available stock
-            existing.quantity = Math.min(
-                existing.quantity + productInfo.quantity,
-                existing.qty_available
-            );
+            const newQty = existing.quantity + productInfo.quantity;
+            existing.quantity = isScrap
+                ? Math.min(newQty, existing.qty_available)
+                : newQty;
         } else {
+            const qty = isScrap
+                ? Math.min(productInfo.quantity, productInfo.qty_available)
+                : productInfo.quantity;
             this.state.lines.push({
                 product_id: productInfo.product_id,
                 product_name: productInfo.product_name,
-                quantity: Math.min(productInfo.quantity, productInfo.qty_available),
+                quantity: qty,
                 uom: productInfo.product_uom,
                 product_uom_id: productInfo.product_uom_id,
                 unit_price: productInfo.unit_price,
@@ -174,14 +198,18 @@ export class ScrapBarcodeDashboard extends Component {
         const val = parseFloat(ev.target.value);
         const line = this.state.lines[lineIndex];
         if (!isNaN(val) && val > 0) {
-            // Cap at available stock
-            line.quantity = Math.min(val, line.qty_available);
+            line.quantity = this.state.mode === 'scrap'
+                ? Math.min(val, line.qty_available)
+                : val;
         }
     }
 
     incrementQuantity(lineIndex) {
         const line = this.state.lines[lineIndex];
-        line.quantity = Math.min(line.quantity + 1, line.qty_available);
+        const newQty = line.quantity + 1;
+        line.quantity = this.state.mode === 'scrap'
+            ? Math.min(newQty, line.qty_available)
+            : newQty;
         this._focusBarcodeInput();
     }
 
@@ -239,9 +267,12 @@ export class ScrapBarcodeDashboard extends Component {
     // Scrap Actions
     // -------------------------------------------------------------------------
 
-    onScrapClick() {
+    onActionClick() {
         if (!this.hasLines) {
-            this.notification.add(_t("No products to scrap"), { type: "warning" });
+            const msg = this.state.mode === 'scrap'
+                ? _t("No products to scrap")
+                : _t("No products to count");
+            this.notification.add(msg, { type: "warning" });
             return;
         }
         this.state.showConfirmDialog = true;
@@ -288,6 +319,42 @@ export class ScrapBarcodeDashboard extends Component {
         this.state.loading = false;
     }
 
+    async confirmInventory() {
+        this.state.showConfirmDialog = false;
+        this.state.loading = true;
+
+        try {
+            const inventoryLines = this.state.lines.map((line) => ({
+                product_id: line.product_id,
+                quantity: line.quantity,
+                product_uom_id: line.product_uom_id,
+            }));
+
+            const result = await this.orm.call(
+                "scrap.dashboard",
+                "apply_inventory_count",
+                [inventoryLines]
+            );
+
+            if (result.success) {
+                this.state.inventoryResult = result;
+                this.state.showResult = true;
+                this.state.scanning = false;
+                this.notification.add(
+                    _t("%s inventory adjustment(s) applied", result.count),
+                    { type: "success" }
+                );
+            }
+        } catch (error) {
+            this.notification.add(
+                error.message || _t("Error applying inventory count"),
+                { type: "danger" }
+            );
+        }
+
+        this.state.loading = false;
+    }
+
     // -------------------------------------------------------------------------
     // Post-scrap Actions
     // -------------------------------------------------------------------------
@@ -327,6 +394,7 @@ export class ScrapBarcodeDashboard extends Component {
         this.state.barcode = "";
         this.state.showResult = false;
         this.state.scrapResult = null;
+        this.state.inventoryResult = null;
         this.state.scanning = true;
         this.loadDefaultConfig();
         this.loadReasonTags();

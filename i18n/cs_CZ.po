@@ -43,6 +43,24 @@ msgstr "Žádné produkty k vyřazení"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "No products to count"
+msgstr "Žádné produkty k inventuře"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "%s inventory adjustment(s) applied"
+msgstr "%s inventurní úprava(y) provedena"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
+msgid "Error applying inventory count"
+msgstr "Chyba při provádění inventury"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/js/scrap_dashboard.js:0
 msgid "%s scrap order(s) created and confirmed"
 msgstr "%s objednávka(y) vyřazení vytvořena a potvrzena"
 
@@ -278,8 +296,128 @@ msgstr "Zahájit nové vyřazení"
 #. module: mrp_barcode_scrap
 #. odoo-javascript
 #: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Start New Count Session"
+msgstr "Zahájit novou inventuru"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
 msgid "Processing scrap orders..."
 msgstr "Zpracovávám objednávky vyřazení..."
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Applying inventory count..."
+msgstr "Provádím inventuru..."
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Inventory Count"
+msgstr "Inventura"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Scrap"
+msgstr "Vyřazení"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Products counted:"
+msgstr "Spočítáno produktů:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Total value:"
+msgstr "Celková hodnota:"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Apply Count for"
+msgstr "Potvrdit inventuru pro"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Confirm Inventory Count"
+msgstr "Potvrdit inventuru"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Apply the following inventory counts?"
+msgstr "Provést následující inventurní úpravy?"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Counted"
+msgstr "Napočítáno"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Difference"
+msgstr "Rozdíl"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Apply Count"
+msgstr "Potvrdit inventuru"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Inventory Count Applied"
+msgstr "Inventura provedena"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "product(s) updated"
+msgstr "produkt(y) aktualizován(y)"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Inventory Adjustments"
+msgstr "Inventurní úpravy"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Old Stock"
+msgstr "Původní zásoby"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "New Stock"
+msgstr "Nové zásoby"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Current Stock Levels"
+msgstr "Aktuální stav zásob"
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/scrap_dashboard.py:0
+msgid "No products to count."
+msgstr "Žádné produkty k inventuře."
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/scrap_dashboard.py:0
+msgid "No warehouse found for current company."
+msgstr "Sklad nenalezen pro aktuální společnost."
 
 #. module: mrp_barcode_scrap
 #. odoo-javascript

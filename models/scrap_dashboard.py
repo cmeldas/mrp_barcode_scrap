@@ -72,7 +72,7 @@ class ScrapDashboard(models.Model):
                     'product_uom_id': product.uom_id.id,
                     'quantity': weight if weight > 0 else 1.0,
                     'barcode_type': 'weight',
-                    'unit_price': product.list_price,
+                    'unit_price': product.lst_price,
                     'tracking': product.tracking,
                     'qty_available': product.qty_available,
                     'image_url': '/web/image/product.product/%d/image_128' % product.id,
@@ -89,7 +89,7 @@ class ScrapDashboard(models.Model):
                 'product_uom_id': product.uom_id.id,
                 'quantity': 1.0,
                 'barcode_type': 'unit',
-                'unit_price': product.list_price,
+                'unit_price': product.lst_price,
                 'tracking': product.tracking,
                 'qty_available': product.qty_available,
                 'image_url': '/web/image/product.product/%d/image_128' % product.id,
@@ -111,10 +111,86 @@ class ScrapDashboard(models.Model):
                 'product_name': product.display_name,
                 'qty_available': product.qty_available,
                 'uom': product.uom_id.name,
-                'unit_price': product.list_price,
-                'value': product.qty_available * product.list_price,
+                'unit_price': product.lst_price,
+                'value': product.qty_available * product.lst_price,
             }
         return result
+
+    @api.model
+    def apply_inventory_count(self, inventory_lines):
+        """
+        Apply inventory count — set scanned quantities as actual stock levels.
+        Uses stock.quant inventory adjustment mechanism.
+
+        :param inventory_lines: list of dicts with keys:
+            - product_id (int)
+            - quantity (float) — the actual counted quantity
+            - product_uom_id (int)
+        :return: dict with adjustment results and post-count stock
+        """
+        if not inventory_lines:
+            raise UserError("No products to count.")
+
+        warehouse = self.env['stock.warehouse'].search(
+            [('company_id', '=', self.env.company.id)], limit=1
+        )
+        if not warehouse:
+            raise UserError("No warehouse found for current company.")
+
+        location = warehouse.lot_stock_id
+        quant_obj = self.env['stock.quant'].sudo()
+
+        adjustments = []
+        product_ids = []
+
+        for line in inventory_lines:
+            product = self.env['product.product'].browse(line['product_id'])
+            if not product.exists():
+                _logger.warning("Product ID %s not found, skipping.", line['product_id'])
+                continue
+
+            old_qty = product.qty_available
+            new_qty = line['quantity']
+
+            # Find existing quant in the stock location
+            quant = quant_obj.search([
+                ('product_id', '=', product.id),
+                ('location_id', '=', location.id),
+                ('lot_id', '=', False),
+                ('package_id', '=', False),
+                ('owner_id', '=', False),
+            ], limit=1)
+
+            if not quant:
+                quant = quant_obj.with_context(inventory_mode=True).create({
+                    'product_id': product.id,
+                    'location_id': location.id,
+                    'inventory_quantity': new_qty,
+                })
+            else:
+                quant.inventory_quantity = new_qty
+
+            quant.action_apply_inventory()
+            self.env.invalidate_all()
+
+            product_ids.append(product.id)
+            adjustments.append({
+                'product_id': product.id,
+                'product_name': product.display_name,
+                'old_quantity': old_qty,
+                'new_quantity': new_qty,
+                'uom': product.uom_id.name,
+            })
+
+        unique_ids = list(set(product_ids))
+        stock_after = self.get_product_stock(unique_ids)
+
+        return {
+            'success': True,
+            'adjustments': adjustments,
+            'stock_after': stock_after,
+            'count': len(adjustments),
+        }
 
     @api.model
     def create_scrap_orders(self, scrap_lines, scrap_reason_tag_ids):

@@ -2,6 +2,13 @@
    MRP Barcode Scrap - Dashboard Styles
    ============================================================ */
 
+/* ---- Inventory Footer Card ---- */
+.scrap-dashboard .inventory-footer-card {
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+}
+
 .scrap-dashboard {
     background-color: #f0f2f5;
     overflow-y: auto !important;
