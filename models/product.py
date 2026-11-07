@@ -181,6 +181,30 @@ class ProductProduct(models.Model):
             "target": "new",
         }
 
+    @api.model
+    def action_negative_stock_list(self):
+        """Negative Stock: list of storable products with negative on-hand stock in the main warehouse.
+
+        Nothing changes here. The list has the usual filters, search and grouping, so the
+        products can be narrowed down first; the header button Set Stock to Zero then opens
+        the same dialog as the list action (every product with its stock, lines can be
+        removed) and only that dialog applies the change. Archived products are included:
+        products no longer sold often keep a negative stock. The domain is evaluated on every
+        reload, so zeroed products drop out of the list.
+        """
+        self._quick_inventory_check_access()
+        warehouse = self._quick_inventory_warehouse()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Negative Stock"),
+            "res_model": "product.product",
+            "views": [(self.env.ref("mrp_barcode_scrap.product_product_negative_stock_list").id, "list"), (False, "form")],
+            "domain": [("is_storable", "=", True), ("qty_available", "<", 0)],
+            # warehouse_id: on-hand quantity (column and search) in the warehouse the zeroing applies to
+            "context": {"warehouse_id": warehouse.id, "active_test": False, "create": False},
+            "help": "<p class='o_view_nocontent_smiling_face'>%s</p>" % _("No product has negative stock."),
+        }
+
     def action_quick_stock_zero(self):
         """Set Stock to Zero: on-hand quantity of the product (all its variants) to 0 right away."""
         self._quick_inventory_check_access()

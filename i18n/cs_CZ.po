@@ -39,6 +39,8 @@ msgid ""
 "- Inventory count mode (switch in the top right corner): the scanned\n"
 "  quantities add up and become the new stock of the scanned products\n"
 "- Update Stock and Set Stock to Zero buttons on the product and variant form\n"
+"- Negative Stock list (Inventory › Operations › Adjustments, dashboard in inventory mode):\n"
+"  products with negative stock to filter first, then Set Stock to Zero with a preview\n"
 "- Czech translation included\n"
 msgstr ""
 
@@ -369,6 +371,34 @@ msgid "N/A"
 msgstr "neuvedeno"
 
 #. module: mrp_barcode_scrap
+#: model:ir.actions.server,name:mrp_barcode_scrap.action_negative_stock
+#: model:ir.ui.menu,name:mrp_barcode_scrap.menu_negative_stock
+#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_product_negative_stock_list
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/product.py:0
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Negative Stock"
+msgstr "Záporný sklad"
+
+#. module: mrp_barcode_scrap
+#. odoo-python
+#: code:addons/mrp_barcode_scrap/models/product.py:0
+msgid "No product has negative stock."
+msgstr "Žádný produkt nemá záporný sklad."
+
+#. module: mrp_barcode_scrap
+#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_product_negative_stock_list
+msgid "On Hand"
+msgstr "Skladem"
+
+#. module: mrp_barcode_scrap
+#. odoo-javascript
+#: code:addons/mrp_barcode_scrap/static/src/xml/scrap_dashboard.xml:0
+msgid "Products with negative stock: filter them, then set their stock to zero"
+msgstr "Produkty se záporným skladem: nejdřív je vyfiltruj, pak jim vynuluj sklad"
+
+#. module: mrp_barcode_scrap
 #: model:ir.model.fields,field_description:mrp_barcode_scrap.field_scrap_barcode_config__name
 msgid "Name"
 msgstr "Název"
@@ -641,6 +671,7 @@ msgstr "Vyřazení zásob"
 #: code:addons/mrp_barcode_scrap/models/product.py:0
 #: model:ir.actions.server,name:mrp_barcode_scrap.action_product_product_quick_stock_zero
 #: model:ir.actions.server,name:mrp_barcode_scrap.action_product_template_quick_stock_zero
+#: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_product_negative_stock_list
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.product_template_form_view_quick_stock
 #: model_terms:ir.ui.view,arch_db:mrp_barcode_scrap.view_stock_quick_update_form
 msgid "Set Stock to Zero"

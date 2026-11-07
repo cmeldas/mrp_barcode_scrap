@@ -577,6 +577,12 @@ export class ScrapBarcodeDashboard extends Component {
         });
     }
 
+    /** Negative Stock list (same as Inventory › Operations › Adjustments › Negative Stock). */
+    async openNegativeStock() {
+        const action = await this.orm.call("product.product", "action_negative_stock_list", []);
+        this.action.doAction(action);
+    }
+
     /** Update Stock dialog of the product (the module's own wizard, same as the button on the product form). */
     async openInventoryAdjustment(productId) {
         const action = await this.orm.call(

@@ -31,6 +31,13 @@
                                         <i class="oi me-1" data-icon="payments"/>
                                         <t t-out="this.formatCurrency(this.totalValue)"/>
                                     </span>
+                                    <button t-if="this.state.canInventory and this.state.inventoryMode"
+                                            class="btn btn-outline-primary btn-sm"
+                                            title="Products with negative stock: filter them, then set their stock to zero"
+                                            t-on-click="this.openNegativeStock">
+                                        <i class="oi me-1" data-icon="arrow_downward"/>
+                                        <span>Negative Stock</span>
+                                    </button>
                                     <label t-if="this.state.canInventory"
                                            class="scrap-mode-switch form-check form-switch mb-0 ms-2"
                                            title="Inventory count: the scanned quantities become the new stock">

@@ -9,6 +9,16 @@
         action="action_scrap_barcode_dashboard"
     />
 
+    <!-- Inventory › Operations › Adjustments, between Physical Inventory (10) and Scrap (99) -->
+    <menuitem
+        id="menu_negative_stock"
+        name="Negative Stock"
+        parent="stock.menu_stock_adjustments"
+        sequence="20"
+        action="action_negative_stock"
+        groups="stock.group_stock_manager"
+    />
+
     <!-- Configuration submenu -->
     <menuitem
         id="menu_mrp_barcode_scrap_config"

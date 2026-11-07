@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MRP Barcode Scrap',
-    'version': '20.0.1.1.0',
+    'version': '20.0.1.2.0',
     'category': 'Manufacturing',
     'summary': 'Scan barcodes of expiring products and scrap them at once, or count the stock',
     'description': """
@@ -24,6 +24,8 @@ Features:
 - Inventory count mode (switch in the top right corner): the scanned
   quantities add up and become the new stock of the scanned products
 - Update Stock and Set Stock to Zero buttons on the product and variant form
+- Negative Stock list (Inventory › Operations › Adjustments, dashboard in inventory mode):
+  products with negative stock to filter first, then Set Stock to Zero with a preview
 - Czech translation included
     """,
     'author': 'Matouš Čmelík',
@@ -39,8 +41,9 @@ Features:
         'data/scrap_config_data.xml',
         'views/scrap_config_views.xml',
         'views/scrap_dashboard_views.xml',
-        'views/menu_views.xml',
+        # before the menus: action_negative_stock is used by a menu item
         'views/product_views.xml',
+        'views/menu_views.xml',
         'wizard/stock_quick_update_views.xml',
     ],
     'assets': {

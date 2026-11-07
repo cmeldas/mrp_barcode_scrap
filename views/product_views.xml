@@ -43,6 +43,45 @@
         <field name="code">action = records.action_quick_stock_zero_bulk()</field>
     </record>
 
+    <!--
+        Negative Stock: storable products (archived included) with negative stock in the main
+        warehouse. Opened by the menu Inventory › Operations › Adjustments › Negative Stock and the
+        button on the barcode dashboard (inventory mode). The list only shows the products; Set Stock
+        to Zero in the header (after selecting products) opens the preview dialog that applies it.
+        Priority 100: not the default list of product.product.
+    -->
+    <record id="product_product_negative_stock_list" model="ir.ui.view">
+        <field name="name">product.product.negative.stock.list</field>
+        <field name="model">product.product</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Negative Stock" create="0" delete="0" decoration-muted="not active">
+                <header>
+                    <button name="action_quick_stock_zero_bulk" type="object" string="Set Stock to Zero"
+                            class="btn-primary" icon="block"/>
+                </header>
+                <field name="active" column_invisible="1"/>
+                <field name="default_code" optional="show"/>
+                <field name="name"/>
+                <field name="product_template_variant_value_ids" widget="many2many_tags"
+                       groups="product.group_product_variant" optional="show"/>
+                <field name="categ_id" optional="show"/>
+                <field name="qty_available" string="On Hand" decoration-danger="qty_available &lt; 0"/>
+                <field name="uom_id" groups="uom.group_uom" optional="show"/>
+                <field name="standard_price" optional="hide"/>
+                <field name="lst_price" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_negative_stock" model="ir.actions.server">
+        <field name="name">Negative Stock</field>
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="group_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_negative_stock_list()</field>
+    </record>
+
     <!-- The product.product form gets the template header above; there the zero button
          only changes that one variant, so the question must say so. Odoo 20 opens variants
          (Variants button of the template) in this form too, product_variant_easy_edit_view is gone. -->

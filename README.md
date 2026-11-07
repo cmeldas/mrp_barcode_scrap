@@ -20,6 +20,8 @@ stock with the same scanner, and quick stock updates from the product form.
   and become the new stock of the scanned products
 - **Update Stock / Set Stock to Zero** — buttons on the product and variant form, plus a list action
   that sets the stock of the selected products to zero
+- **Negative Stock** — list of all products with negative stock to filter first; the selected ones are
+  set to zero only after a preview
 - **Czech translation included**
 
 ## Screenshots
@@ -86,6 +88,17 @@ must be counted in *Inventory › Physical Inventory*.
   selected products that have stock (already zero ones are left out), lines can be removed, and the
   button *Set Stock to Zero* applies it.
 
+### Negative Stock
+
+1. Open **Inventory › Operations › Adjustments › Negative Stock**, or on the dashboard in inventory
+   mode click **Negative Stock** (inventory administrators only).
+2. The list shows every storable product with negative stock in the main warehouse, archived products
+   included (greyed out). **Nothing changes yet.** Use the usual search, filters and grouping
+   (category, archived…) to narrow the list down.
+3. Select the products (or all of them) and click **Set Stock to Zero** above the list. The dialog shows
+   each product with its current stock and the new stock 0; lines can still be removed.
+4. **Set Stock to Zero** in the dialog applies it. Zeroed products drop out of the list.
+
 Every change is a regular inventory adjustment (move from/to the inventory loss location) in the
 main warehouse of the company, with the reference *Inventory count (barcode)*, *Stock updated
 manually* or *Stock set to zero* in the moves history. The whole stock of the product in the
@@ -105,8 +118,17 @@ starting point; a negative target is refused.
 odoo -d <db> -i mrp_barcode_scrap --test-enable --test-tags /mrp_barcode_scrap --stop-after-init
 ```
 
-29 tests: `test_quick_inventory` (inventory count, Update Stock / Set Stock to Zero) and
-`test_scrap_dashboard` (scrapping from the dashboard).
+31 tests: `test_quick_inventory` (inventory count, Update Stock / Set Stock to Zero, Negative Stock)
+and `test_scrap_dashboard` (scrapping from the dashboard).
+
+## 20.0.1.2.0
+
+Seznam **Záporný sklad** (*Sklady › Operace › Úpravy inventáře*, v dashboardu tlačítko v režimu
+Inventura): skladované produkty se záporným stavem v hlavním skladu včetně archivovaných, nejdřív jen
+k zobrazení a filtrování. Vynuluje je až tlačítko *Vynulovat sklad* nad seznamem přes stávající dialog
+s náhledem (`action_quick_stock_zero_bulk`). Doména `qty_available < 0` s kontextem `warehouse_id`
+se vyhodnocuje při každém načtení, vynulované produkty ze seznamu zmizí. Bez migrace dat (nový pohled,
+akce a menu).
 
 ## Odoo 20
 

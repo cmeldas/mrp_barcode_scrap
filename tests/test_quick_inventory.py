@@ -41,7 +41,45 @@ class TestQuickInventory(TransactionCase):
     def _set(self, product, location, qty):
         self.Quant._update_available_quantity(product, location, qty)
 
+    def _negative_stock_products(self):
+        """Products the Negative Stock list shows (its domain in its context)."""
+        action = self.Product.action_negative_stock_list()
+        return self.Product.with_context(**action["context"]).search(action["domain"])
+
     # ------------------------------------------------------------------
+    def test_negative_stock_list(self):
+        """Negative Stock: storable products with negative stock, archived ones too; opening it changes nothing,
+        the dialog from its header button zeroes only the lines that are kept."""
+        old = self.Product.create({"name": "Starý jogurt", "type": "consu", "is_storable": True})
+        self._set(self.jam, self.stock, -5)
+        self._set(self.cheese, self.stock, 3)
+        self._set(self.variant_a, self.shelf, -2)
+        self._set(old, self.stock, -4)
+        old.active = False
+
+        found = self._negative_stock_products()
+        self.assertIn(self.jam, found)
+        self.assertIn(self.variant_a, found, "zápor na podřízeném místě skladu")
+        self.assertIn(old, found, "archivovaný produkt se záporným skladem")
+        self.assertNotIn(self.cheese, found)
+        self.assertNotIn(self.variant_b, found)
+        self.assertNotIn(self.service, found)
+        self.assertEqual(self._on_hand(self.jam), -5, "seznam jen ukazuje")
+
+        wizard_action = (self.jam | old).action_quick_stock_zero_bulk()
+        wizard = self.env["stock.quick.update"].browse(wizard_action["res_id"])
+        self.assertEqual(set(wizard.line_ids.product_id.ids), {self.jam.id, old.id})
+        wizard.line_ids.filtered(lambda line: line.product_id == old).unlink()
+        wizard.action_apply()
+        self.assertEqual(self._on_hand(self.jam), 0)
+        self.assertEqual(self._on_hand(old), -4, "odebraný řádek se nemění")
+        self.assertNotIn(self.jam, self._negative_stock_products())
+
+    def test_negative_stock_list_needs_stock_manager(self):
+        user = new_test_user(self.env, login="negative_stock_user", groups="stock.group_stock_user")
+        with self.assertRaises(AccessError):
+            self.Product.with_user(user).action_negative_stock_list()
+
     def test_set_quantity_from_negative_stock(self):
         self._set(self.jam, self.stock, -28)
         self.assertEqual(self._on_hand(self.jam), -28)
