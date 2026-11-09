@@ -130,6 +130,11 @@ s náhledem (`action_quick_stock_zero_bulk`). Doména `qty_available < 0` s kont
 se vyhodnocuje při každém načtení, vynulované produkty ze seznamu zmizí. Bez migrace dat (nový pohled,
 akce a menu).
 
+**20.0.1.2.1:** tlačítko na dashboardu ukazovalo u prázdného seznamu text „Žádný produkt nemá záporný
+sklad“ i se značkami HTML. Spouští teď serverovou akci z menu (`action_negative_stock`) podle XML ID;
+webový klient označí text nápovědy jako HTML jen u akcí, které sám načte nebo spustí, ne u slovníku
+vráceného přes `orm.call`.
+
 ## Odoo 20
 
 Port z 19.0.1.1.0 na **20.0.1.1.0** (větev `20.0`). Chování pro obsluhu zůstává stejné, změnilo se

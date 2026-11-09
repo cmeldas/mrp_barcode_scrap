@@ -577,10 +577,13 @@ export class ScrapBarcodeDashboard extends Component {
         });
     }
 
-    /** Negative Stock list (same as Inventory › Operations › Adjustments › Negative Stock). */
+    /**
+     * Negative Stock list: the same server action as Inventory › Operations › Adjustments › Negative Stock.
+     * Run by its XML ID, not through orm.call: only actions loaded or run by the web client get their
+     * help (empty list text) marked as HTML, a returned action dict would show the raw tags.
+     */
     async openNegativeStock() {
-        const action = await this.orm.call("product.product", "action_negative_stock_list", []);
-        this.action.doAction(action);
+        await this.action.doAction("mrp_barcode_scrap.action_negative_stock");
     }
 
     /** Update Stock dialog of the product (the module's own wizard, same as the button on the product form). */

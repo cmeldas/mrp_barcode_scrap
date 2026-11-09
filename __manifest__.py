@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MRP Barcode Scrap',
-    'version': '20.0.1.2.0',
+    'version': '20.0.1.2.1',
     'category': 'Manufacturing',
     'summary': 'Scan barcodes of expiring products and scrap them at once, or count the stock',
     'description': """
